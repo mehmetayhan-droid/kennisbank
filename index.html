@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boerschappen Kennisbank</title>
+<style>
+  :root {
+    --bodem: #3C332F;
+    --fauna: #E0A69F;
+    --flora: #80885E;
+    --zand: #FFFFEF;
+    --groen-1: #A4B08B;
+    --groen-2: #505A3D;
+    --groen-3: #313A2C;
+    --groen-4: #DCEBCF;
+    --blauw-1: #CED8DE;
+    --blauw-2: #78929D;
+    --roze-1: #FFDCB8;
+    --roze-2: #A1705C;
+    --sidebar-w: 280px;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --transition: 0.18s ease;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Outfit', 'Segoe UI', sans-serif; background: var(--zand); color: var(--bodem); display: flex; height: 100vh; overflow: hidden; }
+  #sidebar { width: var(--sidebar-w); background: var(--bodem); display: flex; flex-direction: column; height: 100vh; flex-shrink: 0; overflow: hidden; }
+  .sidebar-header { padding: 24px 20px 16px; border-bottom: 1px solid rgba(255,255,230,0.1); flex-shrink: 0; }
+  .logo { font-size: 18px; font-weight: 700; color: var(--zand); letter-spacing: -0.3px; margin-bottom: 4px; }
+  .logo-sub { font-size: 12px; color: var(--groen-1); text-transform: uppercase; letter-spacing: 1px; }
+  .search-wrap { padding: 16px 20px; flex-shrink: 0; }
+  .search-input { width: 100%; background: rgba(255,255,230,0.08); border: 1px solid rgba(255,255,230,0.15); border-radius: var(--radius-sm); padding: 9px 12px 9px 34px; color: var(--zand); font-family: inherit; font-size: 13px; outline: none; transition: var(--transition); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A4B08B' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 10px center; }
+  .search-input::placeholder { color: rgba(255,255,230,0.35); }
+  .search-input:focus { border-color: var(--groen-1); background-color: rgba(255,255,230,0.12); }
+  .nav-scroll { overflow-y: auto; flex: 1; padding: 0 12px 20px; }
+  .nav-scroll::-webkit-scrollbar { width: 4px; }
+  .nav-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,230,0.15); border-radius: 4px; }
+  .nav-category { margin-top: 8px; }
+  .nav-category-header { display: flex; align-items: center; gap: 8px; padding: 8px 8px 6px; font-size: 11px; font-weight: 600; color: var(--groen-1); text-transform: uppercase; letter-spacing: 0.8px; cursor: pointer; border-radius: var(--radius-sm); transition: var(--transition); user-select: none; }
+  .nav-category-header:hover { background: rgba(255,255,230,0.05); }
+  .nav-category-icon { font-size: 14px; opacity: 0.8; }
+  .nav-category-chevron { margin-left: auto; transition: transform 0.2s; font-size: 12px; opacity: 0.6; }
+  .nav-category.collapsed .nav-category-chevron { transform: rotate(-90deg); }
+  .nav-category.collapsed .nav-items { display: none; }
+  .nav-items { margin-top: 2px; }
+  .nav-item { display: block; padding: 8px 12px 8px 28px; font-size: 13.5px; color: rgba(255,255,230,0.7); cursor: pointer; border-radius: var(--radius-sm); transition: var(--transition); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav-item:hover { background: rgba(255,255,230,0.07); color: var(--zand); }
+  .nav-item.active { background: rgba(164,176,139,0.2); color: var(--zand); font-weight: 600; }
+  .nav-item .item-tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle; font-weight: 600; text-transform: uppercase; }
+  .tag-process { background: rgba(80,90,61,0.5); color: var(--groen-4); }
+  .tag-bug { background: rgba(161,112,92,0.3); color: var(--fauna); }
+  .tag-howto { background: rgba(120,146,157,0.3); color: var(--blauw-1); }
+  .tag-new { background: rgba(164,176,139,0.3); color: var(--groen-4); }
+  #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { background: white; border-bottom: 1px solid rgba(60,51,47,0.1); padding: 0 32px; height: 60px; display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+  .breadcrumb { font-size: 13px; color: var(--flora); display: flex; align-items: center; gap: 6px; }
+  .breadcrumb span { color: var(--bodem); font-weight: 600; }
+  .topbar-actions { margin-left: auto; display: flex; gap: 8px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: var(--radius-sm); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: var(--transition); text-decoration: none; }
+  .btn-primary { background: var(--flora); color: white; }
+  .btn-primary:hover { background: var(--groen-2); }
+  .btn-ghost { background: transparent; color: var(--bodem); border: 1px solid rgba(60,51,47,0.2); }
+  .btn-ghost:hover { background: rgba(60,51,47,0.05); }
+  .content-area { flex: 1; overflow-y: auto; padding: 40px 48px; }
+  .content-area::-webkit-scrollbar { width: 6px; }
+  .content-area::-webkit-scrollbar-thumb { background: rgba(60,51,47,0.15); border-radius: 4px; }
+  .home-header { margin-bottom: 36px; }
+  .home-title { font-size: 32px; font-weight: 700; color: var(--bodem); line-height: 1.2; margin-bottom: 8px; }
+  .home-subtitle { font-size: 16px; color: var(--flora); }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 40px; }
+  .category-card { background: white; border-radius: var(--radius); padding: 24px; cursor: pointer; border: 1px solid rgba(60,51,47,0.08); transition: var(--transition); }
+  .category-card:hover { border-color: var(--flora); box-shadow: 0 4px 16px rgba(128,136,94,0.15); transform: translateY(-2px); }
+  .card-icon { width: 44px; height: 44px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 14px; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--bodem); margin-bottom: 4px; }
+  .card-count { font-size: 12px; color: var(--flora); }
+  .recent-section h2 { font-size: 18px; font-weight: 700; color: var(--bodem); margin-bottom: 16px; }
+  .recent-list { display: flex; flex-direction: column; gap: 8px; }
+  .recent-item { background: white; border-radius: var(--radius-sm); padding: 14px 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; border: 1px solid rgba(60,51,47,0.08); transition: var(--transition); }
+  .recent-item:hover { border-color: var(--flora); }
+  .recent-item-icon { font-size: 18px; opacity: 0.7; }
+  .recent-item-title { font-size: 14px; font-weight: 600; color: var(--bodem); }
+  .recent-item-meta { font-size: 12px; color: var(--flora); margin-top: 2px; }
+  .recent-item-arrow { margin-left: auto; color: var(--flora); font-size: 16px; }
+  .article-header { margin-bottom: 32px; }
+  .article-tags { display: flex; gap: 8px; margin-bottom: 12px; }
+  .article-tag { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .tag-process-pill { background: var(--groen-4); color: var(--groen-3); }
+  .tag-bug-pill { background: #FFE4DE; color: var(--roze-2); }
+  .tag-howto-pill { background: var(--blauw-1); color: var(--blauw-2); }
+  .tag-info-pill { background: rgba(224,166,159,0.2); color: var(--roze-2); }
+  .article-title { font-size: 28px; font-weight: 700; color: var(--bodem); line-height: 1.25; margin-bottom: 8px; }
+  .article-meta { font-size: 13px; color: var(--flora); display: flex; gap: 16px; }
+  .article-body h2 { font-size: 20px; font-weight: 700; color: var(--bodem); margin: 32px 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--groen-4); }
+  .article-body h3 { font-size: 16px; font-weight: 700; color: var(--bodem); margin: 24px 0 8px; }
+  .article-body p { font-size: 15px; line-height: 1.7; color: var(--bodem); margin-bottom: 14px; }
+  .article-body ul, .article-body ol { margin: 12px 0 16px 20px; }
+  .article-body li { font-size: 15px; line-height: 1.7; color: var(--bodem); margin-bottom: 6px; }
+  .article-body a { color: var(--flora); text-decoration: underline; }
+  .article-body code { background: rgba(60,51,47,0.07); padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; }
+  .article-body pre { background: var(--bodem); color: var(--zand); padding: 16px 20px; border-radius: var(--radius-sm); overflow-x: auto; margin: 16px 0; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.6; }
+  .article-body pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+  .info-block { border-radius: var(--radius-sm); padding: 14px 18px; margin: 16px 0; display: flex; gap: 12px; font-size: 14px; line-height: 1.6; }
+  .info-block-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .info-tip { background: var(--groen-4); color: var(--groen-3); border-left: 3px solid var(--flora); }
+  .info-warning { background: #FFF3D6; color: #7A5800; border-left: 3px solid #F0A800; }
+  .info-danger { background: #FFE4DE; color: var(--roze-2); border-left: 3px solid var(--fauna); }
+  .info-info { background: #EEF4F7; color: var(--blauw-2); border-left: 3px solid var(--blauw-2); }
+  .video-embed { margin: 20px 0; background: var(--bodem); border-radius: var(--radius); overflow: hidden; }
+  .video-embed-label { padding: 10px 16px; font-size: 12px; font-weight: 600; color: var(--groen-1); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+  .video-embed iframe { width: 100%; aspect-ratio: 16/9; border: none; display: block; }
+  .article-image { margin: 20px 0; border-radius: var(--radius); overflow: hidden; border: 1px solid rgba(60,51,47,0.1); }
+  .article-image img { width: 100%; display: block; }
+  .article-image figcaption { background: rgba(60,51,47,0.04); padding: 8px 14px; font-size: 12px; color: var(--flora); font-style: italic; }
+  .process-diagram-wrap { margin: 24px 0; background: white; border-radius: var(--radius); border: 1px solid rgba(60,51,47,0.1); overflow: hidden; }
+  .process-diagram-header { padding: 14px 20px; background: var(--bodem); display: flex; align-items: center; gap: 10px; color: var(--zand); font-size: 13px; font-weight: 600; }
+  .process-diagram-body { padding: 28px 20px; overflow-x: auto; }
+  .diagram-flow { display: flex; align-items: center; flex-wrap: nowrap; gap: 0; min-width: max-content; }
+  .diagram-node { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; position: relative; }
+  .diagram-node-box { background: var(--groen-4); border: 2px solid var(--groen-1); border-radius: var(--radius-sm); padding: 10px 16px; font-size: 13px; font-weight: 600; color: var(--groen-3); text-align: center; min-width: 110px; transition: var(--transition); white-space: nowrap; }
+  .diagram-node:hover .diagram-node-box { background: var(--groen-1); color: white; border-color: var(--flora); box-shadow: 0 0 0 3px rgba(128,136,94,0.2); }
+  .diagram-node-label { font-size: 10px; color: var(--flora); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .diagram-node-box.node-start { background: var(--bodem); color: var(--zand); border-color: var(--bodem); }
+  .diagram-node:hover .diagram-node-box.node-start { background: var(--groen-2); border-color: var(--groen-2); }
+  .diagram-node-box.node-end { background: var(--flora); color: white; border-color: var(--flora); }
+  .diagram-node:hover .diagram-node-box.node-end { background: var(--groen-2); }
+  .diagram-node-box.node-decision { background: #FFF3D6; color: #7A5800; border-color: #F0A800; border-radius: 4px; }
+  .diagram-node:hover .diagram-node-box.node-decision { background: #F0A800; color: white; }
+  .diagram-node-box.node-warning { background: #FFE4DE; color: var(--roze-2); border-color: var(--fauna); }
+  .diagram-node:hover .diagram-node-box.node-warning { background: var(--fauna); color: white; }
+  .diagram-arrow { font-size: 20px; color: var(--groen-1); margin: 0 4px; flex-shrink: 0; user-select: none; margin-bottom: 20px; }
+  .diagram-click-hint { font-size: 11px; color: var(--flora); text-align: right; padding: 8px 16px 12px; font-style: italic; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(60,51,47,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(2px); }
+  .modal-overlay.open { display: flex; }
+  .modal { background: white; border-radius: var(--radius); max-width: 540px; width: 100%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(60,51,47,0.25); animation: modal-in 0.2s ease; }
+  @keyframes modal-in { from { opacity: 0; transform: scale(0.96) translateY(8px); } to { opacity: 1; transform: none; } }
+  .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid rgba(60,51,47,0.1); display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  .modal-title { font-size: 18px; font-weight: 700; color: var(--bodem); }
+  .modal-step { font-size: 12px; color: var(--flora); margin-top: 3px; }
+  .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--flora); padding: 2px 6px; border-radius: 4px; transition: var(--transition); flex-shrink: 0; }
+  .modal-close:hover { background: rgba(60,51,47,0.08); color: var(--bodem); }
+  .modal-body { padding: 20px 24px 24px; font-size: 14px; line-height: 1.7; color: var(--bodem); }
+  .modal-body p { margin-bottom: 10px; }
+  .modal-body ul { margin: 8px 0 10px 18px; }
+  .modal-body li { margin-bottom: 5px; }
+  .modal-body h4 { font-size: 14px; font-weight: 700; color: var(--bodem); margin: 14px 0 6px; }
+  .steps-list { counter-reset: step; margin: 16px 0; }
+  .step-item { display: flex; gap: 16px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(60,51,47,0.08); }
+  .step-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .step-number { width: 28px; height: 28px; border-radius: 50%; background: var(--flora); color: white; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .step-content h4 { font-size: 15px; font-weight: 700; color: var(--bodem); margin-bottom: 4px; }
+  .step-content p { font-size: 14px; color: var(--bodem); line-height: 1.6; }
+  .link-block { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: white; border: 1px solid rgba(60,51,47,0.1); border-radius: var(--radius-sm); text-decoration: none; color: var(--bodem); margin: 8px 0; transition: var(--transition); }
+  .link-block:hover { border-color: var(--flora); background: var(--groen-4); }
+  .link-block-icon { font-size: 20px; color: var(--flora); }
+  .link-block-text { flex: 1; }
+  .link-block-title { font-size: 14px; font-weight: 600; }
+  .link-block-url { font-size: 12px; color: var(--flora); }
+  .link-block-arrow { font-size: 16px; color: var(--groen-1); }
+  @media (max-width: 860px) { #sidebar { width: 60px; } .logo, .logo-sub, .search-wrap, .nav-category-header span, .nav-item, .nav-category-chevron { display: none; } .nav-category-icon { font-size: 20px; margin: 0 auto; display: block; } .content-area { padding: 24px 20px; } }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">🌿 Boerschappen</div>
+    <div class="logo-sub">Kennisbank</div>
+  </div>
+  <div class="search-wrap">
+    <input class="search-input" type="search" placeholder="Zoeken…" id="searchInput" oninput="handleSearch(this.value)">
+  </div>
+  <div class="nav-scroll" id="navScroll"></div>
+</nav>
+<div id="main">
+  <div class="topbar">
+    <div class="breadcrumb" id="breadcrumb"><span>Home</span></div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" onclick="showHome()">🏠 Home</button>
+      <a class="btn btn-primary" href="https://github.com/new" target="_blank">+ Artikel toevoegen</a>
+    </div>
+  </div>
+  <div class="content-area" id="contentArea"></div>
+</div>
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle"></div>
+        <div class="modal-step" id="modalStep"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+<script>
+const WIKI_DATA = {
+  categories: [
+    { id: "processen", label: "Processen", icon: "🔄", items: [
+      { id: "abonnement-flow", title: "Abonnement & betaalflow", tag: "process" },
+      { id: "order-fulfilment", title: "Order → Fulfilment", tag: "process" },
+      { id: "culinair-workflow", title: "Culinaire werkwijze", tag: "process" },
+      { id: "release-process", title: "Release proces", tag: "process" },
+    ]},
+    { id: "software", label: "Software & systemen", icon: "💻", items: [
+      { id: "odoo-basics", title: "Odoo — Aan de slag", tag: "howto" },
+      { id: "shopify-setup", title: "Shopify beheer", tag: "howto" },
+      { id: "juo-subscriptions", title: "Juo abonnementen", tag: "howto" },
+      { id: "trengo-klantenservice", title: "Trengo klantenservice", tag: "howto" },
+      { id: "nextup-tms", title: "NextUp TMS", tag: "howto" },
+      { id: "mollie-betalingen", title: "Mollie betalingen", tag: "howto" },
+    ]},
+    { id: "bugs", label: "Bugs & oplossingen", icon: "🐛", items: [
+      { id: "bug-shopify-sync", title: "Shopify–Odoo sync issues", tag: "bug" },
+      { id: "bug-juo-lock", title: "Juo lock niet getriggerd", tag: "bug" },
+      { id: "bug-mollie-webhook", title: "Mollie webhook mislukt", tag: "bug" },
+    ]},
+    { id: "overdracht", label: "Overdracht", icon: "🤝", items: [
+      { id: "overdracht-mehmet", title: "PO rol & verantwoordelijkheden", tag: "howto" },
+      { id: "team-structuur", title: "Team & stakeholders", tag: "info" },
+      { id: "systeem-overzicht", title: "Systeemlandschap 2025", tag: "info" },
+    ]},
+    { id: "klant", label: "Klant & UX", icon: "👤", items: [
+      { id: "review-module", title: "Reviewmodule v1", tag: "howto" },
+      { id: "mijn-omgeving", title: "Mijn omgeving — klant", tag: "howto" },
+    ]}
+  ],
+  articles: {
+    "abonnement-flow": {
+      title: "Abonnement & betaalflow", category: "Processen", tags: ["process"], updated: "Juni 2025", author: "Mehmet Ayhan",
+      content: `<p>Dit artikel beschrijft de complete flow van abonnement → betaling → fulfilment. De flow hangt af van de wijzigingsdeadline op <strong>T-6</strong>.</p><div class="info-block info-warning"><div class="info-block-icon">⚠️</div><div>De T-6 deadline is cruciaal. Tot zes dagen voor levering kunnen klanten wijzigingen doorvoeren. Daarna is de levering definitief vastgezet.</div></div>`,
+      diagram: { title: "Abonnement → Betaling → Levering", nodes: [
+        { id: "t6", label: "T-6\nDeadline", type: "start", info: { title: "T-6: Wijzigingsdeadline", step: "Stap 1", body: "<p>Op T-6 sluit de wijzigingsperiode voor de klant.</p><h4>Wat gebeurt er:</h4><ul><li>Juo bevriest het abonnement</li><li>Definitieve abonnementsorder wordt gegenereerd</li><li>Order naar Shopify als <code>open/unpaid</code></li></ul><h4>Systeem</h4><p>Juo → Shopify → Middleware → Odoo</p>" }},
+        { id: "shopify-order", label: "Order in\nShopify", type: "normal", info: { title: "Order aanmaken in Shopify", step: "Stap 2", body: "<p>Shopify ontvangt de order van Juo als <code>open/unpaid</code>.</p><h4>Middleware sync</h4><p>De middleware synchroniseert naar Odoo voor:</p><ul><li>Productieplanning</li><li>Forecasting & inkoop</li><li>Picking & fulfilment</li><li>Transportplanning</li></ul>" }},
+        { id: "odoo-planning", label: "Odoo\nPlanning", type: "normal", info: { title: "Odoo operationele planning", step: "Stap 3", body: "<p>Odoo gebruikt de definitieve order voor alle operationele planning.</p><ul><li>🥕 Productieplanning en stuklijsten</li><li>📦 Inkoop- en voorraadplanning</li><li>🚛 Picking & fulfilment</li><li>🗺️ Transportplanning via NextUp</li></ul>" }},
+        { id: "t2-incasso", label: "T-2\nIncasso", type: "decision", info: { title: "T-2: SEPA-incasso via Mollie", step: "Stap 4", body: "<p>Twee dagen voor levering initieert Juo de SEPA-incasso via Mollie.</p><h4>Bij succesvolle betaling:</h4><ul><li>Shopify markeert order als <code>paid</code></li><li>Shopify genereert klantfactuur</li><li>Odoo ontvangt bijgewerkte betaalstatus</li></ul>" }},
+        { id: "levering", label: "Levering\n🚚", type: "end", info: { title: "Leverdag", step: "Stap 5", body: "<p>Op de leverdag zijn alle systemen gesynchroniseerd.</p><ul><li>Warehouse: picking & packing afgerond</li><li>Transport: routes via NextUp</li><li>Klant ontvangt levering</li></ul>" }},
+      ]},
+      extraContent: `<h2>Systeemverantwoordelijkheden</h2><ul><li><strong>Juo</strong> — Abonnementen, subscription logic, payment initiation</li><li><strong>Mollie</strong> — PSP, SEPA-incasso</li><li><strong>Shopify</strong> — Orderregistratie, facturatie</li><li><strong>Odoo</strong> — Fulfilment, productie, logistiek</li></ul>`
+    },
+    "bug-mollie-webhook": {
+      title: "Mollie webhook mislukt", category: "Bugs & oplossingen", tags: ["bug"], updated: "Mei 2025", author: "Robert van der Meulen",
+      content: `<p>Dit artikel beschrijft wat te doen als de Mollie betaalbevestiging niet aankomt bij Shopify of Odoo.</p><div class="info-block info-danger"><div class="info-block-icon">🚨</div><div><strong>Impact:</strong> Orders blijven open staan in Shopify. Fulfilment in Odoo wordt geblokkeerd. Klant ontvangt geen factuur.</div></div><h2>Symptomen</h2><ul><li>Order staat als <code>unpaid</code> in Shopify terwijl klant wél betaald heeft</li><li>Orderstatus in Odoo wordt niet bijgewerkt</li><li>Klant ontvangt geen betalingsbevestiging</li></ul><h2>Stap-voor-stap oplossing</h2><div class="steps-list"><div class="step-item"><div class="step-number">1</div><div class="step-content"><h4>Controleer Mollie dashboard</h4><p>Log in op <strong>dashboard.mollie.com</strong> → Betalingen. Zoek op ordernummer. Controleer of status <code>paid</code> is.</p></div></div><div class="step-item"><div class="step-number">2</div><div class="step-content"><h4>Check webhook logs in Shopify</h4><p>Ga naar Shopify Admin → Settings → Notifications → Webhooks. Kijk of er failed deliveries zijn.</p></div></div><div class="step-item"><div class="step-number">3</div><div class="step-content"><h4>Trigger handmatige resync</h4><p>Vraag Robert of Faruk om de middleware handmatig te triggeren. Geef het Shopify order-ID door via Slack #tech.</p></div></div><div class="step-item"><div class="step-number">4</div><div class="step-content"><h4>Verificeer resultaat</h4><p>Check of order in Shopify op <code>paid</code> staat en factuur verstuurd is.</p></div></div></div><div class="info-block info-tip"><div class="info-block-icon">💡</div><div>Structurele oplossing loopt als backlog item: automatische webhook retry logging + alerting. Zie Asana #webhook-monitoring.</div></div>`,
+      extraContent: ``
+    },
+    "review-module": {
+      title: "Reviewmodule v1", category: "Klant & UX", tags: ["howto"], updated: "Juni 2025", author: "Mehmet Ayhan",
+      content: `<p>De reviewmodule stelt klanten in staat om na ontvangst feedback te geven op de box en recepten. In v1 worden reviews intern gebruikt — <strong>niet publiek getoond</strong>.</p><div class="info-block info-info"><div class="info-block-icon">ℹ️</div><div>Reviewen is alleen mogelijk na <code>ontvangen</code>, <code>afgeleverd</code>, <code>afgehaald</code> of <code>afgerond</code> orderstatus.</div></div><h2>Scope v1</h2><ul><li>✅ Receptreviews (1–5 sterren + optionele opmerking)</li><li>✅ Boxreview (1–5 sterren)</li><li>✅ Statuscontrole vóór tonen reviewformulier</li><li>✅ Opslag in Odoo (gekoppeld aan klant, order, box, week, recept)</li><li>✅ Beslisboom bij negatieve boxfeedback (≤2 sterren)</li><li>❌ Publieke weergave</li><li>❌ AI-samenvattingen</li><li>❌ Foto-upload</li></ul>`,
+      diagram: { title: "Negatieve boxfeedback beslisboom", nodes: [
+        { id: "review-start", label: "Klant\nreviewt box", type: "start", info: { title: "Start: klant geeft boxreview", step: "Trigger", body: "<p>De klant ziet de reviewmodule in 'Mijn omgeving' zodra de orderstatus <code>ontvangen/afgeleverd</code> is.</p><p>De klant beoordeelt de gehele box met 1–5 sterren.</p>" }},
+        { id: "score-check", label: "Score ≤ 2\nsterren?", type: "decision", info: { title: "Scorecheck", step: "Beslismoment", body: "<h4>Score > 2 (positief)</h4><p>Feedback opgeslagen in Odoo. Geen verdere actie.</p><h4>Score ≤ 2 (negatief)</h4><p>Beslisboom start. Klant wordt gevraagd wat er mis was.</p>" }},
+        { id: "followup-vragen", label: "Wat was\nhet probleem?", type: "normal", info: { title: "Vervolgvragen", step: "Stap 2a", body: "<p>Keuzeopties (meervoudig):</p><ul><li>Kwaliteit ingrediënten</li><li>Recept klopte niet</li><li>Levering beschadigd</li><li>Portiegrootte</li><li>Anders (vrij tekstveld)</li></ul>" }},
+        { id: "odoo-log", label: "Opslaan\nin Odoo", type: "normal", info: { title: "Opslag in Odoo", step: "Stap 3", body: "<p>Feedbackdata opgeslagen gekoppeld aan:</p><ul><li>Klant-ID</li><li>Order-ID</li><li>Box & week</li><li>Recept-ID's</li></ul>" }},
+        { id: "trengo", label: "Trengo\ntaak 🎫", type: "warning", info: { title: "Trengo follow-up", step: "Optioneel stap 4", body: "<p>Bij bepaalde categorieën wordt automatisch een Trengo ticket aangemaakt.</p><h4>Open punten:</h4><ul><li>Welke categorieën triggeren een ticket?</li><li>Wie is verantwoordelijk?</li><li>Binnen welke SLA?</li></ul>" }},
+      ]},
+      extraContent: `<h2>Open punten v1</h2><ul><li>Exacte orderstatus die review ontgrendelt</li><li>Hoe recept-ID's koppelen aan klantbox?</li><li>Welke feedbackcategorieën triggeren Trengo?</li></ul>`
+    },
+    "odoo-basics": {
+      title: "Odoo — Aan de slag", category: "Software & systemen", tags: ["howto"], updated: "Mei 2025", author: "Faruk Burhan",
+      content: `<p>Odoo is het centrale ERP-systeem van Boerschappen.</p><div class="info-block info-tip"><div class="info-block-icon">💡</div><div>Geen toegang? Neem contact op met Faruk Burhan via Slack <strong>#tech</strong>.</div></div><h2>Inloggen</h2><div class="steps-list"><div class="step-item"><div class="step-number">1</div><div class="step-content"><h4>Ga naar de Odoo URL</h4><p>Open je browser en ga naar <code>boerschappen.odoo.com</code>.</p></div></div><div class="step-item"><div class="step-number">2</div><div class="step-content"><h4>Log in met je Boerschappen account</h4><p>Gebruik je <strong>@boerschappen.nl</strong> e-mailadres. Twee-factor authenticatie is verplicht.</p></div></div><div class="step-item"><div class="step-number">3</div><div class="step-content"><h4>Kies de juiste module</h4><p>Meest gebruikt: Verkoop, Inkoop, Voorraad, Productie en Contacten.</p></div></div></div><h2>Handige links</h2><a class="link-block" href="https://www.odoo.com/documentation" target="_blank"><span class="link-block-icon">📖</span><div class="link-block-text"><div class="link-block-title">Odoo officiële documentatie</div><div class="link-block-url">odoo.com/documentation</div></div><span class="link-block-arrow">↗</span></a><h2>Videotutorial</h2><div class="video-embed"><div class="video-embed-label">🎬 Tutorial video</div><iframe src="https://www.youtube.com/embed/k8ZU2YHAoBE" allowfullscreen title="Odoo introductie"></iframe></div>`,
+      extraContent: ``
+    },
+    "systeem-overzicht": {
+      title: "Systeemlandschap 2025", category: "Overdracht", tags: ["info"], updated: "Juni 2025", author: "Mehmet Ayhan",
+      content: `<p>Overzicht van het applicatielandschap van Boerschappen. We migreren naar Shopify, Odoo en Juo.</p><div class="info-block info-warning"><div class="info-block-icon">⚠️</div><div>Dit landschap is in transitie. Sommige systemen draaien nog in OutSystems.</div></div><h2>Huidige richting</h2><ul><li>🛒 <strong>Webshop</strong> — Shopware → <strong>Shopify</strong></li><li>🏭 <strong>ERP</strong> — OutSystems → <strong>Odoo</strong></li><li>📦 <strong>Warehouse</strong> — Naar <strong>Odoo</strong></li><li>🚛 <strong>TMS</strong> — <strong>NextUp</strong></li><li>🔁 <strong>Abonnementen</strong> — <strong>Juo</strong> binnen Shopify</li><li>💬 <strong>Klantenservice</strong> — <strong>Trengo</strong></li><li>💳 <strong>Betalingen</strong> — <strong>Mollie</strong></li></ul><h2>Centrale bronnen</h2><p><strong>Odoo</strong> is de centrale bron voor alle operationele data. <strong>Shopify</strong> is de consumentgerichte frontend. <strong>Juo</strong> beheert abonnementen en klantlogica.</p>`,
+      extraContent: ``
+    },
+    "team-structuur": {
+      title: "Team & stakeholders", category: "Overdracht", tags: ["info"], updated: "Juni 2025", author: "Mehmet Ayhan",
+      content: `<h2>Tech team</h2><ul><li>👨‍💼 <strong>Piet Hein Zijtveld</strong> — Teamlead & operationeel directeur</li><li>👨‍💻 <strong>Robert van der Meulen</strong> — Freelance senior developer</li><li>👨‍💻 <strong>Leandro Bonora</strong> — Junior developer</li><li>📋 <strong>Mehmet Ayhan</strong> — Product Owner</li><li>🔧 <strong>Faruk Burhan</strong> — Operationeel IT-specialist</li><li>🎓 <strong>Chris Veraart</strong> — Stagiair</li></ul><h2>Stakeholderafdelingen</h2><ul><li>🏭 Productie & Logistiek</li><li>📦 Warehouse</li><li>🚛 Transport</li><li>📣 Marketing & Klant</li><li>💼 Sales / B2B</li><li>💰 Finance</li><li>👥 People & Culture</li><li>🥕 Inkoop & Culinair</li><li>⚙️ Operations</li><li>🏢 Directie</li></ul><h2>Communicatiekanalen</h2><ul><li><strong>Slack #tech</strong> — Dagelijkse tech communicatie</li><li><strong>Asana</strong> — Backlogs & tickets</li><li><strong>GitHub</strong> — Code & documentatie</li></ul>`,
+      extraContent: ``
+    }
+  }
+};
+let currentArticle = null;
+function buildNav() {
+  const container = document.getElementById('navScroll');
+  container.innerHTML = WIKI_DATA.categories.map(cat => `<div class="nav-category" id="cat-${cat.id}"><div class="nav-category-header" onclick="toggleCategory('${cat.id}')"><span class="nav-category-icon">${cat.icon}</span><span>${cat.label}</span><span class="nav-category-chevron">▼</span></div><div class="nav-items">${cat.items.map(item => `<a class="nav-item" id="nav-${item.id}" onclick="loadArticle('${item.id}')" href="#">${item.title}<span class="item-tag tag-${item.tag}">${tagLabel(item.tag)}</span></a>`).join('')}</div></div>`).join('');
+}
+function tagLabel(tag) { return { process: 'proces', bug: 'bug', howto: 'how-to', info: 'info', new: 'nieuw' }[tag] || tag; }
+function toggleCategory(id) { document.getElementById('cat-' + id).classList.toggle('collapsed'); }
+function showHome() {
+  currentArticle = null;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('breadcrumb').innerHTML = '<span>Home</span>';
+  const recentIds = ["abonnement-flow", "review-module", "bug-mollie-webhook", "systeem-overzicht", "odoo-basics"];
+  document.getElementById('contentArea').innerHTML = `<div class="home-header"><h1 class="home-title">👋 Welkom in de Boerschappen Kennisbank</h1><p class="home-subtitle">Werkinstructies, processen, bugoplossingen en overdracht voor het hele team.</p></div><div class="card-grid">${WIKI_DATA.categories.map(cat => { const colors = { processen:'#DCEBCF', software:'#CED8DE', bugs:'#FFDCB8', overdracht:'#E0A69F', klant:'#DCEBCF' }; return `<div class="category-card" onclick="scrollToCategory('${cat.id}')"><div class="card-icon" style="background:${colors[cat.id]||'#DCEBCF'}">${cat.icon}</div><div class="card-title">${cat.label}</div><div class="card-count">${cat.items.length} artikelen</div></div>`; }).join('')}</div><div class="recent-section"><h2>Recente artikelen</h2><div class="recent-list">${recentIds.map(id => { const a = WIKI_DATA.articles[id]; if(!a) return ''; const cat = findCategory(id); return `<div class="recent-item" onclick="loadArticle('${id}')"><span class="recent-item-icon">${cat?cat.icon:'📄'}</span><div><div class="recent-item-title">${a.title}</div><div class="recent-item-meta">${a.category} · ${a.updated}</div></div><span class="recent-item-arrow">→</span></div>`; }).join('')}</div></div>`;
+}
+function scrollToCategory(catId) { const el = document.getElementById('cat-'+catId); if(el) { if(el.classList.contains('collapsed')) toggleCategory(catId); el.scrollIntoView({behavior:'smooth'}); } }
+function findCategory(articleId) { for(const cat of WIKI_DATA.categories) { if(cat.items.find(i=>i.id===articleId)) return cat; } return null; }
+function loadArticle(id) {
+  const article = WIKI_DATA.articles[id];
+  if(!article) { document.getElementById('contentArea').innerHTML=`<p style="color:var(--flora);padding:40px">Dit artikel bestaat nog niet. Voeg het toe via GitHub!</p>`; return; }
+  currentArticle = id;
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  const navEl = document.getElementById('nav-'+id); if(navEl) navEl.classList.add('active');
+  const cat = findCategory(id);
+  document.getElementById('breadcrumb').innerHTML = `${cat?`<a href="#" onclick="showHome();return false;" style="color:var(--flora);text-decoration:none">${cat.icon} ${cat.label}</a> <span style="color:var(--flora);opacity:.4">›</span>`:''}<span>${article.title}</span>`;
+  const tagHtml = article.tags.map(t=>`<span class="article-tag tag-${t}-pill">${tagLabel(t)}</span>`).join('');
+  const diagramHtml = article.diagram ? renderDiagram(article.diagram) : '';
+  document.getElementById('contentArea').innerHTML = `<div class="article-header"><div class="article-tags">${tagHtml}</div><h1 class="article-title">${article.title}</h1><div class="article-meta"><span>✏️ ${article.author}</span><span>📅 ${article.updated}</span></div></div><div class="article-body">${article.content}${diagramHtml}${article.extraContent||''}</div>`;
+  document.getElementById('contentArea').scrollTop = 0;
+}
+function renderDiagram(diagram) {
+  const nodesHtml = diagram.nodes.map((node,i) => { const typeClass={start:'node-start',end:'node-end',decision:'node-decision',warning:'node-warning'}[node.type]||''; const arrow=i<diagram.nodes.length-1?'<div class="diagram-arrow">→</div>':''; const label=node.label.replace(/\n/g,'<br>'); return `<div class="diagram-node" onclick='openNodeModal(${JSON.stringify(node.info).replace(/'/g,"&#39;")})'><div class="diagram-node-box ${typeClass}">${label}</div><div class="diagram-node-label">klik voor info</div></div>${arrow}`; }).join('');
+  return `<div class="process-diagram-wrap"><div class="process-diagram-header">📊 ${diagram.title}</div><div class="process-diagram-body"><div class="diagram-flow">${nodesHtml}</div></div><div class="diagram-click-hint">Klik op een stap voor meer informatie ↑</div></div>`;
+}
+function openNodeModal(info) { document.getElementById('modalTitle').textContent=info.title; document.getElementById('modalStep').textContent=info.step||''; document.getElementById('modalBody').innerHTML=info.body; document.getElementById('modalOverlay').classList.add('open'); }
+function closeModal(e) { if(!e||e.target===document.getElementById('modalOverlay')) document.getElementById('modalOverlay').classList.remove('open'); }
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+function handleSearch(query) {
+  if(!query.trim()){buildNav();return;}
+  const q=query.toLowerCase(); const container=document.getElementById('navScroll'); const results=[];
+  for(const cat of WIKI_DATA.categories) for(const item of cat.items) if(item.title.toLowerCase().includes(q)||item.tag.includes(q)) results.push({...item,catIcon:cat.icon});
+  container.innerHTML = results.length===0 ? `<div style="padding:16px 20px;font-size:13px;color:rgba(255,255,230,0.4)">Geen resultaten</div>` : `<div style="padding:8px 8px 6px;font-size:11px;color:var(--groen-1);text-transform:uppercase;letter-spacing:.8px;font-weight:600;">${results.length} resultaten</div>${results.map(r=>`<a class="nav-item ${currentArticle===r.id?'active':''}" onclick="loadArticle('${r.id}')" href="#">${r.catIcon} ${r.title}<span class="item-tag tag-${r.tag}">${tagLabel(r.tag)}</span></a>`).join('')}`;
+}
+buildNav(); showHome();
+</script>
+</body>
+</html>
