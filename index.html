@@ -178,7 +178,7 @@
     <div class="breadcrumb" id="breadcrumb"><span>Home</span></div>
     <div class="topbar-actions">
       <button class="btn btn-ghost" onclick="showHome()">🏠 Home</button>
-      <a class="btn btn-primary" href="https://github.com/new" target="_blank">+ Artikel toevoegen</a>
+      <a class="btn btn-primary" href="https://github.com/mehmetayhan-droid/kennisbank" target="_blank">+ Artikel toevoegen</a>
     </div>
   </div>
   <div class="content-area" id="contentArea"></div>
@@ -195,130 +195,23 @@
     <div class="modal-body" id="modalBody"></div>
   </div>
 </div>
+<script src="nav.js"></script>
 <script>
-const WIKI_DATA = {
-  categories: [
-    { id: "processen", label: "Processen", icon: "🔄", items: [
-      { id: "abonnement-flow", title: "Abonnement & betaalflow", tag: "process" },
-      { id: "order-fulfilment", title: "Order → Fulfilment", tag: "process" },
-      { id: "culinair-workflow", title: "Culinaire werkwijze", tag: "process" },
-      { id: "release-process", title: "Release proces", tag: "process" },
-      { id: "testscenarios-b2c", title: "Testscenario's B2C-keten", tag: "new" },
-    ]},
-    { id: "software", label: "Software & systemen", icon: "💻", items: [
-      { id: "odoo-basics", title: "Odoo — Aan de slag", tag: "howto" },
-      { id: "shopify-setup", title: "Shopify beheer", tag: "howto" },
-      { id: "juo-subscriptions", title: "Juo abonnementen", tag: "howto" },
-      { id: "trengo-klantenservice", title: "Trengo klantenservice", tag: "howto" },
-      { id: "nextup-tms", title: "NextUp TMS", tag: "howto" },
-      { id: "mollie-betalingen", title: "Mollie betalingen", tag: "howto" },
-    ]},
-    { id: "bugs", label: "Bugs & oplossingen", icon: "🐛", items: [
-      { id: "bug-shopify-sync", title: "Shopify–Odoo sync issues", tag: "bug" },
-      { id: "bug-juo-lock", title: "Juo lock niet getriggerd", tag: "bug" },
-      { id: "bug-mollie-webhook", title: "Mollie webhook mislukt", tag: "bug" },
-    ]},
-    { id: "overdracht", label: "Overdracht", icon: "🤝", items: [
-      { id: "overdracht-mehmet", title: "PO rol & verantwoordelijkheden", tag: "howto" },
-      { id: "team-structuur", title: "Team & stakeholders", tag: "info" },
-      { id: "systeem-overzicht", title: "Systeemlandschap 2025", tag: "info" },
-    ]},
-    { id: "klant", label: "Klant & UX", icon: "👤", items: [
-      { id: "review-module", title: "Reviewmodule v1", tag: "howto" },
-      { id: "mijn-omgeving", title: "Mijn omgeving — klant", tag: "howto" },
-    ]}
-  ],
-  articles: {
-    "abonnement-flow": {
-      title: "Abonnement & betaalflow", category: "Processen", tags: ["process"], updated: "Juni 2026", author: "Mehmet Ayhan",
-      content: `<p>Dit artikel beschrijft de complete flow van abonnement → betaling → fulfilment, conform de <strong>B2C ketenflow v0.4.1</strong>. De flow hangt af van de wijzigingsdeadline op <strong>T-6</strong>.</p><div class="info-block info-warning"><div class="info-block-icon">⚠️</div><div>De T-6 deadline is cruciaal. Tot zes dagen voor levering kunnen klanten wijzigingen doorvoeren. Op T-6 lockt JUO de bestelling én start de incasso. De Shopify-order ontstaat pas wanneer de betaling definitief is (rond T-4) en verschijnt dan direct als 'paid'.</div></div>`,
-      diagram: { title: "Abonnement → Betaling → Levering", nodes: [
-        { id: "t6", label: "T-6\nLock + incasso", type: "start", info: { title: "T-6: Lock en incasso start", step: "Stap 1", body: "<p>Op T-6 sluit de wijzigingsperiode voor de klant.</p><h4>Wat gebeurt er:</h4><ul><li>JUO lockt de bestelling — wijzigingen zijn niet meer mogelijk</li><li>De laatste geldige klantkeuze is leidend</li><li>JUO geeft Mollie de incasso-opdracht; Mollie schiet de incasso in bij de banken</li></ul><h4>Let op</h4><p>In Shopify is op dit moment nog géén order zichtbaar.</p>" }},
-        { id: "t5-bank", label: "T-5\nBankverwerking", type: "normal", info: { title: "T-5: Verwerking door de bank", step: "Stap 2", body: "<p>De bank van de klant verwerkt de afschrijving.</p><p>Status: de betaling staat bij Mollie op <code>pending</code>.</p>" }},
-        { id: "t4-paid", label: "T-4\nPaid + order", type: "decision", info: { title: "T-4: Settlement en ordercreatie", step: "Stap 3", body: "<p>Mollie ontvangt de bevestiging van de bank; de betaling springt op <code>paid</code>.</p><h4>Ordercreatie</h4><ul><li>JUO ontvangt het signaal 'Betaald' en maakt de order aan in Shopify</li><li>De order verschijnt nu pas, direct als <code>paid</code></li><li>Via de middleware gaat de definitieve order naar Odoo</li></ul>" }},
-        { id: "odoo-planning", label: "Odoo\nPlanning", type: "normal", info: { title: "Odoo operationele planning", step: "Stap 4", body: "<p>Odoo gebruikt de definitieve order voor alle operationele planning.</p><ul><li>🥕 Productieplanning en stuklijsten</li><li>📦 Inkoop- en voorraadplanning</li><li>🚛 Picking & fulfilment</li><li>🗺️ Transportplanning via NextUp</li></ul>" }},
-        { id: "levering", label: "Levering\n🚚", type: "end", info: { title: "Leverdag", step: "Stap 5", body: "<p>Op de leverdag zijn alle systemen gesynchroniseerd.</p><ul><li>Warehouse: picking & packing afgerond</li><li>Transport: routes via NextUp</li><li>Klant ontvangt levering</li></ul>" }},
-      ]},
-      extraContent: `<h2>Systeemverantwoordelijkheden</h2><ul><li><strong>Juo</strong> — Abonnementen, subscription logic, payment initiation</li><li><strong>Mollie</strong> — PSP, SEPA-incasso</li><li><strong>Shopify</strong> — Orderregistratie, facturatie</li><li><strong>Odoo</strong> — Fulfilment, productie, logistiek</li></ul><h2>Bron</h2><a class="link-block" href="https://mehmetayhan-droid.github.io/processenb2c/" target="_blank"><span class="link-block-icon">🔄</span><div class="link-block-text"><div class="link-block-title">B2C ketenflow v0.4.1 — volledige diagrammen per stap</div><div class="link-block-url">mehmetayhan-droid.github.io/processenb2c</div></div><span class="link-block-arrow">↗</span></a>`
-    },
-    "bug-mollie-webhook": {
-      title: "Mollie webhook mislukt", category: "Bugs & oplossingen", tags: ["bug"], updated: "Mei 2025", author: "Robert van der Meulen",
-      content: `<p>Dit artikel beschrijft wat te doen als de Mollie betaalbevestiging niet aankomt bij Shopify of Odoo.</p><div class="info-block info-danger"><div class="info-block-icon">🚨</div><div><strong>Impact:</strong> Orders blijven open staan in Shopify. Fulfilment in Odoo wordt geblokkeerd. Klant ontvangt geen factuur.</div></div><h2>Symptomen</h2><ul><li>Order staat als <code>unpaid</code> in Shopify terwijl klant wél betaald heeft</li><li>Orderstatus in Odoo wordt niet bijgewerkt</li><li>Klant ontvangt geen betalingsbevestiging</li></ul><h2>Stap-voor-stap oplossing</h2><div class="steps-list"><div class="step-item"><div class="step-number">1</div><div class="step-content"><h4>Controleer Mollie dashboard</h4><p>Log in op <strong>dashboard.mollie.com</strong> → Betalingen. Zoek op ordernummer. Controleer of status <code>paid</code> is.</p></div></div><div class="step-item"><div class="step-number">2</div><div class="step-content"><h4>Check webhook logs in Shopify</h4><p>Ga naar Shopify Admin → Settings → Notifications → Webhooks. Kijk of er failed deliveries zijn.</p></div></div><div class="step-item"><div class="step-number">3</div><div class="step-content"><h4>Trigger handmatige resync</h4><p>Vraag Robert of Faruk om de middleware handmatig te triggeren. Geef het Shopify order-ID door via Slack #tech.</p></div></div><div class="step-item"><div class="step-number">4</div><div class="step-content"><h4>Verificeer resultaat</h4><p>Check of order in Shopify op <code>paid</code> staat en factuur verstuurd is.</p></div></div></div><div class="info-block info-tip"><div class="info-block-icon">💡</div><div>Structurele oplossing loopt als backlog item: automatische webhook retry logging + alerting. Zie Asana #webhook-monitoring.</div></div>`,
-      extraContent: ``
-    },
-    "review-module": {
-      title: "Reviewmodule v1", category: "Klant & UX", tags: ["howto"], updated: "Juni 2025", author: "Mehmet Ayhan",
-      content: `<p>De reviewmodule stelt klanten in staat om na ontvangst feedback te geven op de box en recepten. In v1 worden reviews intern gebruikt — <strong>niet publiek getoond</strong>.</p><div class="info-block info-info"><div class="info-block-icon">ℹ️</div><div>Reviewen is alleen mogelijk na <code>ontvangen</code>, <code>afgeleverd</code>, <code>afgehaald</code> of <code>afgerond</code> orderstatus.</div></div><h2>Scope v1</h2><ul><li>✅ Receptreviews (1–5 sterren + optionele opmerking)</li><li>✅ Boxreview (1–5 sterren)</li><li>✅ Statuscontrole vóór tonen reviewformulier</li><li>✅ Opslag in Odoo (gekoppeld aan klant, order, box, week, recept)</li><li>✅ Beslisboom bij negatieve boxfeedback (≤2 sterren)</li><li>❌ Publieke weergave</li><li>❌ AI-samenvattingen</li><li>❌ Foto-upload</li></ul>`,
-      diagram: { title: "Negatieve boxfeedback beslisboom", nodes: [
-        { id: "review-start", label: "Klant\nreviewt box", type: "start", info: { title: "Start: klant geeft boxreview", step: "Trigger", body: "<p>De klant ziet de reviewmodule in 'Mijn omgeving' zodra de orderstatus <code>ontvangen/afgeleverd</code> is.</p><p>De klant beoordeelt de gehele box met 1–5 sterren.</p>" }},
-        { id: "score-check", label: "Score ≤ 2\nsterren?", type: "decision", info: { title: "Scorecheck", step: "Beslismoment", body: "<h4>Score > 2 (positief)</h4><p>Feedback opgeslagen in Odoo. Geen verdere actie.</p><h4>Score ≤ 2 (negatief)</h4><p>Beslisboom start. Klant wordt gevraagd wat er mis was.</p>" }},
-        { id: "followup-vragen", label: "Wat was\nhet probleem?", type: "normal", info: { title: "Vervolgvragen", step: "Stap 2a", body: "<p>Keuzeopties (meervoudig):</p><ul><li>Kwaliteit ingrediënten</li><li>Recept klopte niet</li><li>Levering beschadigd</li><li>Portiegrootte</li><li>Anders (vrij tekstveld)</li></ul>" }},
-        { id: "odoo-log", label: "Opslaan\nin Odoo", type: "normal", info: { title: "Opslag in Odoo", step: "Stap 3", body: "<p>Feedbackdata opgeslagen gekoppeld aan:</p><ul><li>Klant-ID</li><li>Order-ID</li><li>Box & week</li><li>Recept-ID's</li></ul>" }},
-        { id: "trengo", label: "Trengo\ntaak 🎫", type: "warning", info: { title: "Trengo follow-up", step: "Optioneel stap 4", body: "<p>Bij bepaalde categorieën wordt automatisch een Trengo ticket aangemaakt.</p><h4>Open punten:</h4><ul><li>Welke categorieën triggeren een ticket?</li><li>Wie is verantwoordelijk?</li><li>Binnen welke SLA?</li></ul>" }},
-      ]},
-      extraContent: `<h2>Open punten v1</h2><ul><li>Exacte orderstatus die review ontgrendelt</li><li>Hoe recept-ID's koppelen aan klantbox?</li><li>Welke feedbackcategorieën triggeren Trengo?</li></ul>`
-    },
-    "odoo-basics": {
-      title: "Odoo — Aan de slag", category: "Software & systemen", tags: ["howto"], updated: "Mei 2025", author: "Faruk Burhan",
-      content: `<p>Odoo is het centrale ERP-systeem van Boerschappen.</p><div class="info-block info-tip"><div class="info-block-icon">💡</div><div>Geen toegang? Neem contact op met Faruk Burhan via Slack <strong>#tech</strong>.</div></div><h2>Inloggen</h2><div class="steps-list"><div class="step-item"><div class="step-number">1</div><div class="step-content"><h4>Ga naar de Odoo URL</h4><p>Open je browser en ga naar <code>boerschappen.odoo.com</code>.</p></div></div><div class="step-item"><div class="step-number">2</div><div class="step-content"><h4>Log in met je Boerschappen account</h4><p>Gebruik je <strong>@boerschappen.nl</strong> e-mailadres. Twee-factor authenticatie is verplicht.</p></div></div><div class="step-item"><div class="step-number">3</div><div class="step-content"><h4>Kies de juiste module</h4><p>Meest gebruikt: Verkoop, Inkoop, Voorraad, Productie en Contacten.</p></div></div></div><h2>Handige links</h2><a class="link-block" href="https://www.odoo.com/documentation" target="_blank"><span class="link-block-icon">📖</span><div class="link-block-text"><div class="link-block-title">Odoo officiële documentatie</div><div class="link-block-url">odoo.com/documentation</div></div><span class="link-block-arrow">↗</span></a><h2>Videotutorial</h2><div class="video-embed"><div class="video-embed-label">🎬 Tutorial video</div><iframe src="https://www.youtube.com/embed/k8ZU2YHAoBE" allowfullscreen title="Odoo introductie"></iframe></div>`,
-      extraContent: ``
-    },
-    "systeem-overzicht": {
-      title: "Systeemlandschap 2025", category: "Overdracht", tags: ["info"], updated: "Juni 2025", author: "Mehmet Ayhan",
-      content: `<p>Overzicht van het applicatielandschap van Boerschappen. We migreren naar Shopify, Odoo en Juo.</p><div class="info-block info-warning"><div class="info-block-icon">⚠️</div><div>Dit landschap is in transitie. Sommige systemen draaien nog in OutSystems.</div></div><h2>Huidige richting</h2><ul><li>🛒 <strong>Webshop</strong> — Shopware → <strong>Shopify</strong></li><li>🏭 <strong>ERP</strong> — OutSystems → <strong>Odoo</strong></li><li>📦 <strong>Warehouse</strong> — Naar <strong>Odoo</strong></li><li>🚛 <strong>TMS</strong> — <strong>NextUp</strong></li><li>🔁 <strong>Abonnementen</strong> — <strong>Juo</strong> binnen Shopify</li><li>💬 <strong>Klantenservice</strong> — <strong>Trengo</strong></li><li>💳 <strong>Betalingen</strong> — <strong>Mollie</strong></li></ul><h2>Centrale bronnen</h2><p><strong>Odoo</strong> is de centrale bron voor alle operationele data. <strong>Shopify</strong> is de consumentgerichte frontend. <strong>Juo</strong> beheert abonnementen en klantlogica.</p>`,
-      extraContent: ``
-    },
-    "team-structuur": {
-      title: "Team & stakeholders", category: "Overdracht", tags: ["info"], updated: "Juni 2025", author: "Mehmet Ayhan",
-      content: `<h2>Tech team</h2><ul><li>👨‍💼 <strong>Piet Hein Zijtveld</strong> — Teamlead & operationeel directeur</li><li>👨‍💻 <strong>Robert van der Meulen</strong> — Freelance senior developer</li><li>👨‍💻 <strong>Leandro Bonora</strong> — Junior developer</li><li>📋 <strong>Mehmet Ayhan</strong> — Product Owner</li><li>🔧 <strong>Faruk Burhan</strong> — Operationeel IT-specialist</li><li>🎓 <strong>Chris Veraart</strong> — Stagiair</li></ul><h2>Stakeholderafdelingen</h2><ul><li>🏭 Productie & Logistiek</li><li>📦 Warehouse</li><li>🚛 Transport</li><li>📣 Marketing & Klant</li><li>💼 Sales / B2B</li><li>💰 Finance</li><li>👥 People & Culture</li><li>🥕 Inkoop & Culinair</li><li>⚙️ Operations</li><li>🏢 Directie</li></ul><h2>Communicatiekanalen</h2><ul><li><strong>Slack #tech</strong> — Dagelijkse tech communicatie</li><li><strong>Asana</strong> — Backlogs & tickets</li><li><strong>GitHub</strong> — Code & documentatie</li></ul>`,
-      extraContent: ``
-    },
-    "order-fulfilment": {
-      title: "Order → Fulfilment", category: "Processen", tags: ["process"], updated: "Juni 2026", author: "Mehmet Ayhan",
-      content: `<p>De complete B2C-keten van boxinhoud tot levering, in negen stappen. Dit artikel is een samenvatting van het werkdocument <strong>B2C ketenflow v0.4.1</strong> — daar staan de uitgebreide diagrammen per stap.</p><div class="info-block info-tip"><div class="info-block-icon">💡</div><div>Kernlogica: <strong>Odoo</strong> bepaalt boxinhoud, prognose en operatie. <strong>Shopify + JUO</strong> initiëren klantorders. <strong>IJsVogel</strong> vult de boxen en last mile levert uit.</div></div>`,
-      diagram: { title: "B2C-keten — overkoepelende volgorde", nodes: [
-        { id: "of-boxinhoud", label: "1. Boxinhoud\n& recepten", type: "start", info: { title: "Odoo — boxinhoud & receptbepaling", step: "Stap 1", body: "<p>Odoo Culinair bepaalt per week de box: recepten op basis van ingrediënten, vertaling naar concrete SKU's, hoeveelheden per personenaantal en de stuklijst (BOM).</p><h4>Output</h4><ul><li>Naar prognosemodule: SKU's, hoeveelheden, productiedag</li><li>Naar orderverwerking: boxproduct / productcontext</li><li>Naar Shopify/JUO: recepten en boxinhoud</li></ul>" }},
-        { id: "of-orderinitiatie", label: "2. Shopify\n+ JUO", type: "normal", info: { title: "Shopify + JUO — orderinitiatie", step: "Stap 2", body: "<p>De klant kiest een box of abonnement en kan tot T-6 wijzigen: box, levering overslaan, adres, bezorgmethode en add-ons.</p><p>Op T-6 lockt JUO de bestelling en start de incasso. Zodra Mollie <code>paid</code> meldt (rond T-4) registreert Shopify de order en gaat deze via de middleware naar Odoo.</p>" }},
-        { id: "of-orderverwerking", label: "3. Odoo\norderverwerking", type: "normal", info: { title: "Odoo — orderverwerking", step: "Stap 3", body: "<p>Odoo matcht of maakt de consument aan en koppelt de verkooporder. Alle orderdata zit in de verkooporder: orderregels met het daadwerkelijke product (bijv. de box als product), leverdatum, leverwijze en add-ons.</p><p>De order wordt operationeel beschikbaar voor labelgeneratie, voorraadconsumptie en productie-/fulfillmentcontrole.</p>" }},
-        { id: "of-prognose", label: "4. Prognose\n& inkoop", type: "normal", info: { title: "Odoo — prognosemodule & inkoop", step: "Stap 4", body: "<p>Inkoop start op basis van prognose, niet rechtstreeks op basis van definitieve orders.</p><ul><li>Prognosebehoefte per productiedag en per SKU</li><li>Voorraadcontrole: bij tekort → leverancier bepalen, RFQ, inkooporder</li><li>Ontvangst registreren → voorraad beschikbaar voor de productiedag</li></ul>" }},
-        { id: "of-voorraad", label: "5. Voorraad-\nreservering", type: "decision", info: { title: "Odoo — voorraadreservering per productiedag", step: "Stap 5", body: "<p>Prognosevoorraad wordt gekoppeld aan de productiedag. Daadwerkelijke orders slokken de prognosevoorraad op — ze creëren géén nieuwe inkoopbehoefte.</p><p>Bij een tekort wordt een afwijking gesignaleerd: aanvullen, vervangen of corrigeren.</p>" }},
-        { id: "of-productie", label: "6. Productie-\nplanning", type: "normal", info: { title: "Odoo — productieplanning", step: "Stap 6", body: "<p>Op basis van daadwerkelijke orders en gereserveerde voorraad: aantallen per boxproduct en productiedag, productieorders/werkorders en vulinstructies.</p><p>Output: instructies richting IJsVogel als CSV (zoals voorheen vanuit OutSystems), die in MyPlantFloor wordt ingelezen.</p>" }},
-        { id: "of-ijsvogel", label: "7. IJsVogel\nboxen vullen", type: "normal", info: { title: "IJsVogel — boxen vullen & klaarzetten", step: "Stap 7", body: "<p>De fysieke operatie: producten klaarzetten, juiste hoeveelheden picken, boxen vullen, add-ons toevoegen en inhoud controleren.</p><p>Output: gereedmelding en eventuele afwijkingen richting Odoo.</p>" }},
-        { id: "of-terugkoppeling", label: "8. Odoo\nterugkoppeling", type: "normal", info: { title: "Odoo — operationele terugkoppeling", step: "Stap 8", body: "<p>Odoo verwerkt de gereedmelding: fulfillmentstatus bijwerken, voorraadmutaties verwerken en afwijkingen registreren.</p><p>Is de order klaar voor levering, dan wordt deze gemarkeerd voor transport en komt leverinformatie beschikbaar voor labelgeneratie.</p>" }},
-        { id: "of-lastmile", label: "9. Last mile\n🚚", type: "end", info: { title: "Last mile & levering", step: "Stap 9", body: "<p>Labels en leverinformatie worden gebruikt voor routeplanning, laden en bezorging.</p><p>Bij een mislukte levering wordt de afwijking teruggekoppeld aan Odoo voor opvolging. De leverstatus kan terug naar de klantomgeving.</p>" }},
-      ]},
-      extraContent: `<h2>Open vragen (v0.4.1)</h2><ul><li>Wanneer ontstaat de Shopify-order definitief: bij lock, pending of paid?</li><li>Wordt de verkooporder in Odoo automatisch bevestigd?</li><li>Waar is factuurstatus leidend?</li><li>Waar registreren we storneringen en wat is de operationele impact?</li><li>Wat gebeurt er precies met de CSV in MyPlantFloor?</li><li>Hoe koppelen we box/week/boxproduct/variant in Odoo?</li></ul><h2>Bron</h2><a class="link-block" href="https://mehmetayhan-droid.github.io/processenb2c/" target="_blank"><span class="link-block-icon">🔄</span><div class="link-block-text"><div class="link-block-title">B2C ketenflow v0.4.1 — volledige diagrammen per stap</div><div class="link-block-url">mehmetayhan-droid.github.io/processenb2c</div></div><span class="link-block-arrow">↗</span></a>`
-    },
-    "culinair-workflow": {
-      title: "Culinaire werkwijze", category: "Processen", tags: ["process"], updated: "Juni 2026", author: "Mehmet Ayhan",
-      content: `<p>Boxinhoud & receptbepaling is <strong>stap 1</strong> van de B2C-keten: van culinaire en commerciële planning naar boxinhoud, recepten, SKU's en de basis voor de prognose.</p>`,
-      diagram: { title: "Odoo — boxinhoud & receptbepaling", nodes: [
-        { id: "cw-planning", label: "Culinaire\nplanning", type: "start", info: { title: "Culinaire / commerciële planning", step: "Start", body: "<p>De culinaire en commerciële planning is het startpunt. In Odoo Culinair / boxconfiguratie wordt per week de box bepaald.</p>" }},
-        { id: "cw-recept", label: "Recept\nmaken", type: "normal", info: { title: "Recept maken op basis van ingrediënten", step: "Stap 2", body: "<p>Recepten worden opgebouwd vanuit ingrediënten. Algemene ingrediënten worden vertaald naar concrete SKU's, met hoeveelheden per aantal personen.</p><p>Let op: ook niet-lineaire hoeveelheden moeten kloppen per personenaantal.</p>" }},
-        { id: "cw-bom", label: "Stuklijst\n(BOM)", type: "normal", info: { title: "Stuklijst / BOM opbouwen", step: "Stap 3", body: "<p>Op basis van recepten en hoeveelheden wordt de stuklijst (BOM) opgebouwd, gevolgd door een controle op volledigheid.</p>" }},
-        { id: "cw-akkoord", label: "Boxinhoud\nakkoord?", type: "decision", info: { title: "Controle en akkoord", step: "Beslismoment", body: "<p>Is de boxinhoud niet akkoord, dan gaat het terug naar de boxconfiguratie. Bij akkoord is de boxinhoud definitief.</p>" }},
-        { id: "cw-output", label: "Definitieve\nboxinhoud", type: "end", info: { title: "Definitieve boxinhoud", step: "Output", body: "<h4>Drie outputs</h4><ul><li>Prognosemodule: SKU's, hoeveelheden, productiedag</li><li>Orderverwerking: boxproduct / productcontext</li><li>Shopify/JUO: recepten en boxinhoud voor de klant</li></ul>" }},
-      ]},
-      extraContent: `<div class="info-block info-warning"><div class="info-block-icon">⚠️</div><div><strong>Open punt:</strong> de variantkoppeling per week/dag is nog niet definitief en moet met het team besproken worden. Daarom is de boxvariant niet als harde orderkoppeling opgenomen.</div></div>`
-    },
-    "juo-subscriptions": {
-      title: "Juo abonnementen", category: "Software & systemen", tags: ["howto"], updated: "Juni 2026", author: "Mehmet Ayhan",
-      content: `<p>JUO is de subscription module binnen Shopify en beheert de abonnementen en klantlogica. In eerste instantie via de native JUO-module, met toevoegingen van recepten en boxinhoud.</p><h2>Wat kan de klant wijzigen (tot T-6)?</h2><ul><li>Box wijzigen</li><li>Levering overslaan</li><li>Adres wijzigen</li><li>Bezorgmethode wijzigen</li><li>Losse artikelen / add-ons aanpassen</li></ul><div class="info-block info-warning"><div class="info-block-icon">⚠️</div><div>Op <strong>T-6</strong> lockt JUO de bestelling. Daarna zijn klantwijzigingen niet meer toegestaan; de klant krijgt een duidelijke melding. De laatste geldige klantkeuze vóór het lockmoment is leidend.</div></div><h2>Incasso- en ordercreatietijdlijn</h2><div class="steps-list"><div class="step-item"><div class="step-number">1</div><div class="step-content"><h4>Dag T-6 — incasso start</h4><p>JUO geeft Mollie de opdracht. Mollie schiet de incasso in bij de banken. In Shopify is nog geen order zichtbaar.</p></div></div><div class="step-item"><div class="step-number">2</div><div class="step-content"><h4>Dag T-5 — verwerking</h4><p>De bank van de klant verwerkt de afschrijving. De betaling staat bij Mollie op <code>pending</code>.</p></div></div><div class="step-item"><div class="step-number">3</div><div class="step-content"><h4>Dag T-4 — settlement</h4><p>Mollie ontvangt de bevestiging van de bank; de betaling springt op <code>paid</code>.</p></div></div><div class="step-item"><div class="step-number">4</div><div class="step-content"><h4>Dag T-4 — ordercreatie</h4><p>JUO ontvangt het signaal 'Betaald' en maakt de order aan in Shopify. De order verschijnt nu pas, direct als <code>paid</code>.</p></div></div></div>`,
-      extraContent: `<h2>Gerelateerd</h2><a class="link-block" href="#" onclick="loadArticle('abonnement-flow');return false;"><span class="link-block-icon">🔄</span><div class="link-block-text"><div class="link-block-title">Abonnement & betaalflow</div><div class="link-block-url">Processen</div></div><span class="link-block-arrow">→</span></a>`
-    },
-    "mollie-betalingen": {
-      title: "Mollie betalingen", category: "Software & systemen", tags: ["howto"], updated: "Juni 2026", author: "Mehmet Ayhan",
-      content: `<p>Mollie is de PSP van Boerschappen en verzorgt de SEPA-incasso's van abonnementen. JUO initieert de betaling, Mollie verwerkt deze bij de banken.</p><h2>Statusverloop</h2><ul><li><code>pending</code> — incasso is ingeschoten, de bank verwerkt de afschrijving (T-6 t/m T-5)</li><li><code>paid</code> — settlement bevestigd door de bank (rond T-4); JUO maakt op dit signaal de Shopify-order aan</li></ul><div class="info-block info-tip"><div class="info-block-icon">💡</div><div>Geen dubbele orders bij herhaalde webhook of retry — de keten moet idempotent zijn. Dit is onderdeel van de testscenario's.</div></div><h2>Betaling mislukt of blijft pending</h2><ul><li>Geen onterechte levering zonder afgesproken businessregel</li><li>Status moet zichtbaar zijn voor Finance en operatie</li><li>Geen dubbele incasso of dubbele order</li></ul><h2>Stornering (open vraag)</h2><p>Wordt een betaling ná ordercreatie gestorneerd, dan is nog niet definitief bepaald waar en hoe dit geregistreerd wordt. Belangrijk daarbij:</p><ul><li>Stornering zichtbaar in het juiste bronsysteem</li><li>Odoo krijgt een duidelijke status of signaal</li><li>Finance weet waar de financiële opvolging plaatsvindt</li><li>Operatie weet of de order geblokkeerd, geannuleerd of alsnog geleverd moet worden</li></ul>`,
-      extraContent: `<h2>Gerelateerd</h2><a class="link-block" href="#" onclick="loadArticle('bug-mollie-webhook');return false;"><span class="link-block-icon">🐛</span><div class="link-block-text"><div class="link-block-title">Mollie webhook mislukt</div><div class="link-block-url">Bugs & oplossingen</div></div><span class="link-block-arrow">→</span></a><a class="link-block" href="https://dashboard.mollie.com" target="_blank"><span class="link-block-icon">💳</span><div class="link-block-text"><div class="link-block-title">Mollie dashboard</div><div class="link-block-url">dashboard.mollie.com</div></div><span class="link-block-arrow">↗</span></a>`
-    },
-    "testscenarios-b2c": {
-      title: "Testscenario's B2C-keten", category: "Processen", tags: ["process"], updated: "Juni 2026", author: "Mehmet Ayhan",
-      content: `<p>Voor de end-to-end B2C-keten is een afvinkbare testset van <strong>24 scenario's</strong> beschikbaar, van orderinitiatie tot levering. De voortgang wordt lokaal in je browser opgeslagen.</p><h2>Testgroepen</h2><ul><li><strong>Orderinitiatie in JUO / Shopify</strong> (3) — wijzigen vóór deadline, lock, incasso- en ordercreatieflow</li><li><strong>Middleware / orderoverdracht naar Odoo</strong> (4) — order landt exact één keer, nieuwe en bestaande consument, volledige verkooporderdata</li><li><strong>Boxinhoud, recepten en publicatie</strong> (3) — box per week, recept op ingrediënten, publicatie naar Shopify/JUO</li><li><strong>Prognose, inkoop en voorraad</strong> (3) — prognosebehoefte, RFQ/inkoop, orders boeken af op prognosevoorraad</li><li><strong>Betaling, factuur en stornering</strong> (3) — succesvol, mislukt/pending, stornering na ordercreatie</li><li><strong>Productieplanning en IJsVogel / MyPlantFloor</strong> (3) — instructies, CSV, fysiek vullen</li><li><strong>Odoo terugkoppeling en fulfillment</strong> (2) — gereedmelding, afwijking tijdens vullen</li><li><strong>Last mile en levering</strong> (3) — labelgeneratie, route en levering, levering mislukt</li></ul><h2>Open testvragen</h2><ul><li>Wanneer ontstaat de Shopify-order definitief: bij lock, pending of paid?</li><li>Wordt de verkooporder in Odoo automatisch bevestigd?</li><li>Waar is factuurstatus leidend?</li><li>Waar registreren we storneringen en wat is de operationele impact?</li><li>Wat gebeurt er precies met de CSV in MyPlantFloor?</li><li>Hoe koppelen we box/week/boxproduct/variant in Odoo?</li></ul>`,
-      extraContent: `<h2>Naar de testset</h2><a class="link-block" href="https://mehmetayhan-droid.github.io/processenb2c/" target="_blank"><span class="link-block-icon">✅</span><div class="link-block-text"><div class="link-block-title">Afvinkbare testscenario's — tabblad 'Testscenario's'</div><div class="link-block-url">mehmetayhan-droid.github.io/processenb2c</div></div><span class="link-block-arrow">↗</span></a>`
-    }
-  }
-};
+// Artikeldata staat in losse bestanden onder articles/<id>.js — zie nav.js voor de lijst.
+window.WIKI_ARTICLES = {};
+const WIKI_DATA = { categories: window.WIKI_NAV, articles: window.WIKI_ARTICLES };
 let currentArticle = null;
+function loadArticleScripts() {
+  const ids = [];
+  WIKI_DATA.categories.forEach(cat => cat.items.forEach(item => ids.push(item.id)));
+  return Promise.all(ids.map(id => new Promise(resolve => {
+    const s = document.createElement('script');
+    s.src = 'articles/' + id + '.js';
+    s.onload = resolve;
+    s.onerror = resolve; // placeholder zonder artikelbestand is geen fout
+    document.head.appendChild(s);
+  })));
+}
 function buildNav() {
   const container = document.getElementById('navScroll');
   container.innerHTML = WIKI_DATA.categories.map(cat => `<div class="nav-category" id="cat-${cat.id}"><div class="nav-category-header" onclick="toggleCategory('${cat.id}')"><span class="nav-category-icon">${cat.icon}</span><span>${cat.label}</span><span class="nav-category-chevron">▼</span></div><div class="nav-items">${cat.items.map(item => `<a class="nav-item" id="nav-${item.id}" onclick="loadArticle('${item.id}')" href="#">${item.title}<span class="item-tag tag-${item.tag}">${tagLabel(item.tag)}</span></a>`).join('')}</div></div>`).join('');
@@ -329,7 +222,7 @@ function showHome() {
   currentArticle = null;
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   document.getElementById('breadcrumb').innerHTML = '<span>Home</span>';
-  const recentIds = ["order-fulfilment", "testscenarios-b2c", "abonnement-flow", "juo-subscriptions", "review-module"];
+  const recentIds = window.WIKI_RECENT || [];
   document.getElementById('contentArea').innerHTML = `<div class="home-header"><h1 class="home-title">👋 Welkom in de Boerschappen Kennisbank</h1><p class="home-subtitle">Werkinstructies, processen, bugoplossingen en overdracht voor het hele team.</p></div><div class="card-grid">${WIKI_DATA.categories.map(cat => { const colors = { processen:'#DCEBCF', software:'#CED8DE', bugs:'#FFDCB8', overdracht:'#E0A69F', klant:'#DCEBCF' }; return `<div class="category-card" onclick="scrollToCategory('${cat.id}')"><div class="card-icon" style="background:${colors[cat.id]||'#DCEBCF'}">${cat.icon}</div><div class="card-title">${cat.label}</div><div class="card-count">${cat.items.length} artikelen</div></div>`; }).join('')}</div><div class="recent-section"><h2>Recente artikelen</h2><div class="recent-list">${recentIds.map(id => { const a = WIKI_DATA.articles[id]; if(!a) return ''; const cat = findCategory(id); return `<div class="recent-item" onclick="loadArticle('${id}')"><span class="recent-item-icon">${cat?cat.icon:'📄'}</span><div><div class="recent-item-title">${a.title}</div><div class="recent-item-meta">${a.category} · ${a.updated}</div></div><span class="recent-item-arrow">→</span></div>`; }).join('')}</div></div>`;
 }
 function scrollToCategory(catId) { const el = document.getElementById('cat-'+catId); if(el) { if(el.classList.contains('collapsed')) toggleCategory(catId); el.scrollIntoView({behavior:'smooth'}); } }
@@ -360,7 +253,7 @@ function handleSearch(query) {
   for(const cat of WIKI_DATA.categories) for(const item of cat.items) if(item.title.toLowerCase().includes(q)||item.tag.includes(q)) results.push({...item,catIcon:cat.icon});
   container.innerHTML = results.length===0 ? `<div style="padding:16px 20px;font-size:13px;color:rgba(255,255,230,0.4)">Geen resultaten</div>` : `<div style="padding:8px 8px 6px;font-size:11px;color:var(--groen-1);text-transform:uppercase;letter-spacing:.8px;font-weight:600;">${results.length} resultaten</div>${results.map(r=>`<a class="nav-item ${currentArticle===r.id?'active':''}" onclick="loadArticle('${r.id}')" href="#">${r.catIcon} ${r.title}<span class="item-tag tag-${r.tag}">${tagLabel(r.tag)}</span></a>`).join('')}`;
 }
-buildNav(); showHome();
+loadArticleScripts().then(() => { buildNav(); showHome(); });
 </script>
 </body>
 </html>
