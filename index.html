@@ -197,7 +197,8 @@
 </div>
 <script src="nav.js"></script>
 <script>
-// Artikeldata staat in losse bestanden onder articles/<id>.js — zie nav.js voor de lijst.
+// Artikeldata staat in losse bestanden onder articles/<id>.json — zie nav.js voor de lijst.
+// Deze JSON-bestanden worden bewerkt via Pages CMS (pagescms.org); zie .pages.yml.
 window.WIKI_ARTICLES = {};
 const WIKI_DATA = { categories: window.WIKI_NAV, articles: window.WIKI_ARTICLES };
 const REPO = "mehmetayhan-droid/kennisbank";
@@ -224,16 +225,15 @@ async function fetchLastUpdated(id) {
     return out;
   } catch(e) { updatedCache[id] = null; return null; }
 }
-function loadArticleScripts() {
+function loadArticleData() {
   const ids = [];
   WIKI_DATA.categories.forEach(cat => cat.items.forEach(item => ids.push(item.id)));
-  return Promise.all(ids.map(id => new Promise(resolve => {
-    const s = document.createElement('script');
-    s.src = 'articles/' + id + '.js';
-    s.onload = resolve;
-    s.onerror = resolve; // placeholder zonder artikelbestand is geen fout
-    document.head.appendChild(s);
-  })));
+  return Promise.all(ids.map(id =>
+    fetch('articles/' + id + '.json')
+      .then(r => r.ok ? r.json() : null)
+      .then(a => { if (a) WIKI_ARTICLES[id] = a; })
+      .catch(() => {}) // placeholder zonder artikelbestand is geen fout
+  ));
 }
 function buildNav() {
   const container = document.getElementById('navScroll');
@@ -277,7 +277,7 @@ function handleSearch(query) {
   for(const cat of WIKI_DATA.categories) for(const item of cat.items) if(item.title.toLowerCase().includes(q)||item.tag.includes(q)) results.push({...item,catIcon:cat.icon});
   container.innerHTML = results.length===0 ? `<div style="padding:16px 20px;font-size:13px;color:rgba(255,255,230,0.4)">Geen resultaten</div>` : `<div style="padding:8px 8px 6px;font-size:11px;color:var(--groen-1);text-transform:uppercase;letter-spacing:.8px;font-weight:600;">${results.length} resultaten</div>${results.map(r=>`<a class="nav-item ${currentArticle===r.id?'active':''}" onclick="loadArticle('${r.id}')" href="#">${r.catIcon} ${r.title}<span class="item-tag tag-${r.tag}">${tagLabel(r.tag)}</span></a>`).join('')}`;
 }
-loadArticleScripts().then(() => { buildNav(); showHome(); });
+loadArticleData().then(() => { buildNav(); showHome(); });
 </script>
 </body>
 </html>

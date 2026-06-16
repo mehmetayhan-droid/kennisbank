@@ -1,0 +1,83 @@
+media:
+  input: media
+  output: /media
+
+content:
+  - name: articles
+    label: Artikelen
+    type: collection
+    path: articles
+    format: json
+    view:
+      fields: [title, category, updated]
+    fields:
+      - name: title
+        label: Titel
+        type: string
+        required: true
+      - name: category
+        label: Categorie
+        type: select
+        options:
+          values: [Processen, Operatie, "Software & systemen", "Bugs & oplossingen", Overdracht, "Klant & UX"]
+      - name: tags
+        label: Labels
+        type: select
+        options:
+          multiple: true
+          values: [process, bug, howto, info, new]
+      - name: author
+        label: Auteur
+        type: string
+      - name: updated
+        label: Datum (terugval-tekst)
+        type: string
+      - name: content
+        label: Inhoud (HTML)
+        type: code
+        options:
+          language: html
+      - name: diagram
+        label: Diagram (optioneel)
+        type: object
+        required: false
+        fields:
+          - name: title
+            label: Diagramtitel
+            type: string
+          - name: nodes
+            label: Stappen
+            type: object
+            list: true
+            fields:
+              - name: id
+                label: Interne id
+                type: string
+              - name: label
+                label: Label (gebruik \n voor nieuwe regel)
+                type: string
+              - name: type
+                label: Type
+                type: select
+                options:
+                  values: [start, normal, decision, warning, end]
+              - name: info
+                label: Pop-up info
+                type: object
+                fields:
+                  - name: title
+                    label: Titel
+                    type: string
+                  - name: step
+                    label: Stap-label
+                    type: string
+                  - name: body
+                    label: Tekst (HTML)
+                    type: code
+                    options:
+                      language: html
+      - name: extraContent
+        label: Extra inhoud onder diagram (HTML)
+        type: code
+        options:
+          language: html

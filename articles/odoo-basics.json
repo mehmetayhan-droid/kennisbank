@@ -1,0 +1,9 @@
+{
+  "title": "Odoo — Aan de slag",
+  "category": "Software & systemen",
+  "tags": ["howto"],
+  "updated": "Mei 2025",
+  "author": "Faruk Burhan",
+  "content": "<p>Odoo is het centrale ERP-systeem van Boerschappen.</p><div class=\"info-block info-tip\"><div class=\"info-block-icon\">💡</div><div>Geen toegang? Neem contact op met Faruk Burhan via Slack <strong>#tech</strong>.</div></div><h2>Inloggen</h2><div class=\"steps-list\"><div class=\"step-item\"><div class=\"step-number\">1</div><div class=\"step-content\"><h4>Ga naar de Odoo URL</h4><p>Open je browser en ga naar <code>boerschappen.odoo.com</code>.</p></div></div><div class=\"step-item\"><div class=\"step-number\">2</div><div class=\"step-content\"><h4>Log in met je Boerschappen account</h4><p>Gebruik je <strong>@boerschappen.nl</strong> e-mailadres. Twee-factor authenticatie is verplicht.</p></div></div><div class=\"step-item\"><div class=\"step-number\">3</div><div class=\"step-content\"><h4>Kies de juiste module</h4><p>Meest gebruikt: Verkoop, Inkoop, Voorraad, Productie en Contacten.</p></div></div></div><h2>Handige links</h2><a class=\"link-block\" href=\"https://www.odoo.com/documentation\" target=\"_blank\"><span class=\"link-block-icon\">📖</span><div class=\"link-block-text\"><div class=\"link-block-title\">Odoo officiële documentatie</div><div class=\"link-block-url\">odoo.com/documentation</div></div><span class=\"link-block-arrow\">↗</span></a><h2>Videotutorial</h2><div class=\"video-embed\"><div class=\"video-embed-label\">🎬 Tutorial video</div><iframe src=\"https://www.youtube.com/embed/k8ZU2YHAoBE\" allowfullscreen title=\"Odoo introductie\"></iframe></div>",
+  "extraContent": ""
+}
