@@ -9,7 +9,7 @@ window.WIKI_NAV = [
     { id: "testscenarios-b2c", title: "Testscenario's B2C-keten", tag: "new" },
   ]},
   { id: "operatie", label: "Operatie", icon: "⚙️", items: [
-    { id: "productie-omzetten", title: "Productieprocessen — Ontdooien", tag: "new" },
+    { id: "productie-ontdooi", title: "Productieprocessen — Ontdooien", tag: "new" },
   ]},
   { id: "software", label: "Software & systemen", icon: "💻", items: [
     { id: "odoo-basics", title: "Odoo — Aan de slag", tag: "howto" },
@@ -21,4 +21,4 @@ window.WIKI_NAV = [
   ]}
 ];
 // Artikelen die op de homepage onder "Recente artikelen" staan:
-window.WIKI_RECENT = ["productie-omzetten", "order-fulfilment", "testscenarios-b2c", "abonnement-flow", "juo-subscriptions"];
+window.WIKI_RECENT = ["productie-ontdooi", "order-fulfilment", "testscenarios-b2c", "abonnement-flow", "juo-subscriptions"];
