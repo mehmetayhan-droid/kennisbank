@@ -200,7 +200,30 @@
 // Artikeldata staat in losse bestanden onder articles/<id>.js — zie nav.js voor de lijst.
 window.WIKI_ARTICLES = {};
 const WIKI_DATA = { categories: window.WIKI_NAV, articles: window.WIKI_ARTICLES };
+const REPO = "mehmetayhan-droid/kennisbank";
 let currentArticle = null;
+// Haal de laatste wijzigingsdatum van een artikelbestand op via de GitHub API (commit-datum).
+// Resultaat wordt gecachet zodat we de rate-limit niet onnodig raken.
+const updatedCache = {};
+function fmtDate(iso) {
+  try { return new Date(iso).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }); }
+  catch(e) { return null; }
+}
+async function fetchLastUpdated(id) {
+  if (updatedCache[id] !== undefined) return updatedCache[id];
+  try {
+    const cached = sessionStorage.getItem('upd-' + id);
+    if (cached) { updatedCache[id] = cached; return cached; }
+    const r = await fetch(`https://api.github.com/repos/${REPO}/commits?path=articles/${id}.js&per_page=1`);
+    if (!r.ok) throw new Error('api');
+    const data = await r.json();
+    const iso = data && data[0] && data[0].commit && data[0].commit.committer && data[0].commit.committer.date;
+    const out = iso ? fmtDate(iso) : null;
+    updatedCache[id] = out;
+    if (out) sessionStorage.setItem('upd-' + id, out);
+    return out;
+  } catch(e) { updatedCache[id] = null; return null; }
+}
 function loadArticleScripts() {
   const ids = [];
   WIKI_DATA.categories.forEach(cat => cat.items.forEach(item => ids.push(item.id)));
@@ -237,8 +260,9 @@ function loadArticle(id) {
   document.getElementById('breadcrumb').innerHTML = `${cat?`<a href="#" onclick="showHome();return false;" style="color:var(--flora);text-decoration:none">${cat.icon} ${cat.label}</a> <span style="color:var(--flora);opacity:.4">›</span>`:''}<span>${article.title}</span>`;
   const tagHtml = article.tags.map(t=>`<span class="article-tag tag-${t}-pill">${tagLabel(t)}</span>`).join('');
   const diagramHtml = article.diagram ? renderDiagram(article.diagram) : '';
-  document.getElementById('contentArea').innerHTML = `<div class="article-header"><div class="article-tags">${tagHtml}</div><h1 class="article-title">${article.title}</h1><div class="article-meta"><span>✏️ ${article.author}</span><span>📅 ${article.updated}</span></div></div><div class="article-body">${article.content}${diagramHtml}${article.extraContent||''}</div>`;
+  document.getElementById('contentArea').innerHTML = `<div class="article-header"><div class="article-tags">${tagHtml}</div><h1 class="article-title">${article.title}</h1><div class="article-meta"><span>✏️ ${article.author}</span><span id="auto-updated">🕐 Laatst bijgewerkt: ${article.updated}</span></div></div><div class="article-body">${article.content}${diagramHtml}${article.extraContent||''}</div>`;
   document.getElementById('contentArea').scrollTop = 0;
+  fetchLastUpdated(id).then(d => { if (d && currentArticle === id) { const el = document.getElementById('auto-updated'); if (el) el.textContent = `🕐 Laatst bijgewerkt: ${d}`; } });
 }
 function renderDiagram(diagram) {
   const nodesHtml = diagram.nodes.map((node,i) => { const typeClass={start:'node-start',end:'node-end',decision:'node-decision',warning:'node-warning'}[node.type]||''; const arrow=i<diagram.nodes.length-1?'<div class="diagram-arrow">→</div>':''; const label=node.label.replace(/\n/g,'<br>'); return `<div class="diagram-node" onclick='openNodeModal(${JSON.stringify(node.info).replace(/'/g,"&#39;")})'><div class="diagram-node-box ${typeClass}">${label}</div><div class="diagram-node-label">klik voor info</div></div>${arrow}`; }).join('');
