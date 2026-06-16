@@ -19,7 +19,7 @@ content:
         label: Categorie
         type: select
         options:
-          values: [Processen, Operatie, "Software & systemen", "Bugs & oplossingen", Overdracht, "Klant & UX"]
+          values: [Processen, Operatie, "Software & systemen"]
       - name: tags
         label: Labels
         type: select
