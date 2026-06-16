@@ -8,6 +8,9 @@ window.WIKI_NAV = [
     { id: "release-process", title: "Release proces", tag: "process" },
     { id: "testscenarios-b2c", title: "Testscenario's B2C-keten", tag: "new" },
   ]},
+  { id: "operatie", label: "Operatie", icon: "⚙️", items: [
+    { id: "productie-omzetten", title: "Productieprocessen — omzetten & ompakken", tag: "new" },
+  ]},
   { id: "software", label: "Software & systemen", icon: "💻", items: [
     { id: "odoo-basics", title: "Odoo — Aan de slag", tag: "howto" },
     { id: "shopify-setup", title: "Shopify beheer", tag: "howto" },
@@ -32,4 +35,4 @@ window.WIKI_NAV = [
   ]}
 ];
 // Artikelen die op de homepage onder "Recente artikelen" staan:
-window.WIKI_RECENT = ["order-fulfilment", "testscenarios-b2c", "abonnement-flow", "juo-subscriptions", "review-module"];
+window.WIKI_RECENT = ["productie-omzetten", "order-fulfilment", "testscenarios-b2c", "abonnement-flow", "juo-subscriptions"];
