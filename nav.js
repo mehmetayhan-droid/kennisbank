@@ -9,7 +9,7 @@ window.WIKI_NAV = [
     { id: "testscenarios-b2c", title: "Testscenario's B2C-keten", tag: "new" },
   ]},
   { id: "operatie", label: "Operatie", icon: "⚙️", items: [
-    { id: "productie-omzetten", title: "Productieprocessen — omzetten & ompakken", tag: "new" },
+    { id: "productie-omzetten", title: "Productieprocessen — Ontdooien", tag: "new" },
   ]},
   { id: "software", label: "Software & systemen", icon: "💻", items: [
     { id: "odoo-basics", title: "Odoo — Aan de slag", tag: "howto" },
